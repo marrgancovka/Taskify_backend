@@ -12,3 +12,8 @@ type Task struct {
 	Priority    string    `json:"priority"`
 	CreatedDate string    `json:"created_date"`
 }
+
+type TaskInBoard struct {
+	Board    *ListBoards        `json:"board"`
+	Sections []*SectionWithTask `json:"section"`
+}

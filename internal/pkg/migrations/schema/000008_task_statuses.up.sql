@@ -1,7 +1,7 @@
 CREATE TABLE default.task_statuses
 (
     task_id UUID,
-    is_completed UInt8, -- 0 = не выполнено, 1 = выполнено
+    is_completed Bool,
     updated_at DateTime DEFAULT now()
 )
     ENGINE = ReplacingMergeTree()

@@ -6,6 +6,7 @@ import (
 	"TaskTracker/internal/pkg/tokenizer"
 	"TaskTracker/pkg/hasher"
 	"context"
+	"errors"
 	"go.uber.org/fx"
 	"log/slog"
 )
@@ -52,7 +53,7 @@ func (uc *Usecase) Login(ctx context.Context, data *models.LoginRequest) (*model
 		return nil, err
 	}
 	if !hasher.CompareStringHash(data.Password, user.Password) {
-		return nil, err
+		return nil, errors.New("invalid password")
 	}
 	token, err := uc.tokenizer.GenerateJWT(&models.TokenPayload{UserID: user.ID})
 	if err != nil {

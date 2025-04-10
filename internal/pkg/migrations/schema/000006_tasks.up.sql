@@ -6,7 +6,7 @@ CREATE TABLE default.tasks
     name String,
     description String,
     due_date DateTime,
-    priority Int32, -- 1 = низкий, 2 = средний, 3 = высокий
+    priority Int32,
     created_at DateTime DEFAULT now()
 )
     ENGINE = MergeTree()

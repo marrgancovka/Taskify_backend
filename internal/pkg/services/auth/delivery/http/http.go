@@ -65,9 +65,12 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		responser.Send400(w, "error to read request data")
 		return
 	}
+
 	token, err := h.useCase.Login(r.Context(), userData)
 	if err != nil {
 		h.log.Error("error to login: " + err.Error())
+		responser.Send400(w, "error to read request data")
+		return
 	}
 
 	http.SetCookie(w, &http.Cookie{
