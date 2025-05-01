@@ -10,9 +10,9 @@ type Section struct {
 }
 
 type SectionWithTask struct {
-	ID       uuid.UUID `json:"id"`
-	BoardID  uuid.UUID `json:"-"`
-	Name     string    `json:"name"`
-	Position int32     `json:"position"`
-	Tasks    []*Task   `json:"tasks"`
+	ID       uuid.UUID   `json:"id"`
+	BoardID  uuid.UUID   `json:"-"`
+	Name     string      `json:"name"`
+	Position int32       `json:"position"`
+	Tasks    []*TaskData `json:"tasks"`
 }

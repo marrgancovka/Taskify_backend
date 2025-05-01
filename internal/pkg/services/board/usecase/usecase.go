@@ -68,6 +68,51 @@ func (uc *Usecase) GetTaskInBoard(ctx context.Context, boardID uuid.UUID, userID
 	return taskInBoard, nil
 }
 
-func (uc *Usecase) AddMember(ctx context.Context, memberData *models.BoardMemberAdd) error {
-	return uc.repo.AddMember(ctx, memberData)
+func (uc *Usecase) AddMember(ctx context.Context, memberData *models.BoardMemberAdd, inviterID uuid.UUID) (*models.BoardMember, error) {
+	userData, err := uc.repo.GetUserByEmail(ctx, memberData.Email)
+	if err != nil {
+		return nil, err
+	}
+	boardMember := &models.BoardMember{
+		BoardID: memberData.BoardID,
+		UserID:  userData.ID,
+		RoleID:  memberData.RoleID,
+		IsFav:   false,
+	}
+
+	boardMember, err = uc.repo.AddBoardMember(ctx, boardMember, inviterID)
+	if err != nil {
+		return nil, err
+	}
+	return boardMember, nil
+}
+
+func (uc *Usecase) AddTask(ctx context.Context, task *models.TaskCreate, createdBy uuid.UUID) (*models.TaskCreate, error) {
+	task.ID = uuid.New()
+	task, err := uc.repo.AddTask(ctx, task, createdBy)
+	if err != nil {
+		return nil, err
+	}
+	return task, nil
+}
+
+func (uc *Usecase) CreateSection(ctx context.Context, section *models.Section, userID uuid.UUID) (*models.Section, error) {
+	section.ID = uuid.New()
+	section, err := uc.repo.CreateSection(ctx, section, userID)
+	if err != nil {
+		return nil, err
+	}
+	return section, nil
+}
+
+func (uc *Usecase) GetBoardMemberList(ctx context.Context, boardID uuid.UUID) ([]*models.BoardMemberList, error) {
+	return uc.repo.GetBoardMembers(ctx, boardID)
+}
+
+func (uc *Usecase) GetAllTasks(ctx context.Context, boardID uuid.UUID) ([]*models.AllTask, error) {
+	return uc.repo.GetAllTasks(ctx, boardID)
+}
+
+func (uc *Usecase) UpdateTask(ctx context.Context, task *models.UpdateTask, updatedBy uuid.UUID) (*models.UpdateTask, error) {
+	return uc.repo.UpdateTask(ctx, task, updatedBy)
 }

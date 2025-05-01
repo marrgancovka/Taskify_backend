@@ -114,32 +114,136 @@ func (h *Handler) GetBoardTasks(w http.ResponseWriter, r *http.Request) {
 	responser.Send200(w, task)
 }
 
+//func (h *Handler) AddMember(w http.ResponseWriter, r *http.Request) {
+//	boardID, err := reader.ReadVarsUUID(r, "boardID")
+//	if err != nil {
+//		http.Error(w, "Invalid board ID", http.StatusBadRequest)
+//		return
+//	}
+//	memberData := &models.BoardMemberAdd{}
+//	if err = reader.ReadRequestData(r, &memberData); err != nil {
+//		http.Error(w, "Invalid board ID", http.StatusBadRequest)
+//		return
+//	}
+//	memberData.BoardID = boardID
+//	err = h.useCase.AddMember(r.Context(), memberData)
+//	if err != nil {
+//		h.log.Error("addMember", "err", err.Error())
+//		responser.Send500(w, err.Error())
+//		return
+//	}
+//	responser.Send200(w, nil)
+//}
+
+func (h *Handler) CreateSection(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(constans.ContextValue).(uuid.UUID)
+
+	sectionData := &models.Section{}
+	if err := reader.ReadRequestData(r, sectionData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	h.log.Debug("CreateSection", "userId", userId, "sectionData", sectionData)
+
+	section, err := h.useCase.CreateSection(r.Context(), sectionData, userId)
+	if err != nil {
+		responser.Send500(w, err.Error())
+		return
+	}
+	responser.Send200(w, section)
+
+}
+
+func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
+	taskData := &models.TaskCreate{}
+	if err := reader.ReadRequestData(r, taskData); err != nil {
+		h.log.Error("CreateTask", "err", err.Error())
+		responser.Send400(w, err.Error())
+		return
+	}
+	userID := r.Context().Value(constans.ContextValue).(uuid.UUID)
+	createdTask, err := h.useCase.AddTask(r.Context(), taskData, userID)
+	if err != nil {
+		h.log.Error("addTask", "err", err.Error())
+		responser.Send500(w, err.Error())
+		return
+	}
+	responser.Send200(w, &createdTask)
+}
+
 func (h *Handler) AddMember(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(constans.ContextValue).(uuid.UUID)
 	boardID, err := reader.ReadVarsUUID(r, "boardID")
 	if err != nil {
 		http.Error(w, "Invalid board ID", http.StatusBadRequest)
 		return
 	}
-	memberData := &models.BoardMember{}
-	if err = reader.ReadRequestData(r, &memberData); err != nil {
-		http.Error(w, "Invalid board ID", http.StatusBadRequest)
+
+	addMemberData := &models.BoardMemberAdd{}
+	if err := reader.ReadRequestData(r, addMemberData); err != nil {
+		h.log.Error("AddMember", "err", err.Error())
+		responser.Send400(w, err.Error())
 		return
 	}
-	memberData.BoardID = boardID
-	err = h.useCase.AddMember(r.Context(), memberData)
+	addMemberData.BoardID = boardID
+
+	addedMember, err := h.useCase.AddMember(r.Context(), addMemberData, userId)
 	if err != nil {
 		h.log.Error("addMember", "err", err.Error())
 		responser.Send500(w, err.Error())
 		return
 	}
-	responser.Send200(w, nil)
+	responser.Send200(w, addedMember)
+
 }
 
-func (h *Handler) AddSection(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetBoardMembers(w http.ResponseWriter, r *http.Request) {
 	boardID, err := reader.ReadVarsUUID(r, "boardID")
 	if err != nil {
 		http.Error(w, "Invalid board ID", http.StatusBadRequest)
 		return
 	}
 
+	list, err := h.useCase.GetBoardMemberList(r.Context(), boardID)
+	if err != nil {
+		h.log.Error("GetBoardMembers", "err", err.Error())
+		responser.Send500(w, err.Error())
+		return
+	}
+	responser.Send200(w, list)
+}
+
+func (h *Handler) GetAllTasks(w http.ResponseWriter, r *http.Request) {
+	boardID, err := reader.ReadVarsUUID(r, "boardID")
+	if err != nil {
+		http.Error(w, "Invalid board ID", http.StatusBadRequest)
+		return
+	}
+
+	tasks, err := h.useCase.GetAllTasks(r.Context(), boardID)
+	if err != nil {
+		h.log.Error("GetAllTasks", "err", err.Error())
+		responser.Send500(w, err.Error())
+		return
+	}
+	responser.Send200(w, tasks)
+
+}
+
+func (h *Handler) EditTask(w http.ResponseWriter, r *http.Request) {
+	updateData := &models.UpdateTask{}
+	if err := reader.ReadRequestData(r, updateData); err != nil {
+		h.log.Error("EditTask", "err", err.Error())
+		responser.Send400(w, err.Error())
+		return
+	}
+	userId := r.Context().Value(constans.ContextValue).(uuid.UUID)
+
+	taskID, err := h.useCase.UpdateTask(r.Context(), updateData, userId)
+	if err != nil {
+		h.log.Error("EditTask", "err", err.Error())
+		responser.Send500(w, err.Error())
+		return
+	}
+	responser.Send200(w, taskID)
 }

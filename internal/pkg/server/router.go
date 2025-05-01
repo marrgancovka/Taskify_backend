@@ -51,6 +51,18 @@ func NewRouter(p RouterParams) *Router {
 	boards.HandleFunc("/favourite/{boardID}", p.BoardHandler.SetFavouriteBoard).Methods(http.MethodPut, http.MethodOptions)
 	boards.HandleFunc("/nofavourite/{boardID}", p.BoardHandler.SetNoFavouriteBoard).Methods(http.MethodPut, http.MethodOptions)
 	boards.HandleFunc("/{boardID}/member", p.BoardHandler.AddMember).Methods(http.MethodPost, http.MethodOptions)
+	boards.HandleFunc("/{boardID}/member", p.BoardHandler.GetBoardMembers).Methods(http.MethodGet, http.MethodOptions)
+	boards.HandleFunc("/{boardID}/all_tasks", p.BoardHandler.GetAllTasks).Methods(http.MethodGet, http.MethodOptions)
+
+	tasks := v1.PathPrefix("/task").Subrouter()
+	tasks.Use(p.AuthMiddleware.JwtMiddleware)
+	tasks.HandleFunc("", p.BoardHandler.CreateTask).Methods(http.MethodPost, http.MethodOptions)
+	tasks.HandleFunc("", p.BoardHandler.EditTask).Methods(http.MethodPut, http.MethodOptions)
+
+	sections := v1.PathPrefix("/sections").Subrouter()
+	sections.Use(p.AuthMiddleware.JwtMiddleware)
+
+	sections.HandleFunc("", p.BoardHandler.CreateSection).Methods(http.MethodPost, http.MethodOptions)
 
 	router := &Router{
 		handler: api,

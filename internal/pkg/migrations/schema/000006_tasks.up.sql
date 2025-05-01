@@ -7,7 +7,8 @@ CREATE TABLE default.tasks
     description String,
     due_date DateTime,
     priority Int32,
+    percent Int32 default 0,
     created_at DateTime DEFAULT now()
 )
-    ENGINE = MergeTree()
-ORDER BY (board_id, section_id, due_date, priority);
+    ENGINE = MergeTree
+ORDER BY (board_id);
